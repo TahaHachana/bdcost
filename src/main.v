@@ -34,6 +34,7 @@ fn main() {
 	// Parse the command line arguments
 	token := fp.string('token', `t`, bd_api_token, 'The Bright Data API token.')
 	months := fp.int('months', `m`, 12, 'The number of months to retrieve data for.')
+	zone := fp.string('zone', `z`, '', 'The zone to retrieve data for.')
 
 	finalize_fp(mut fp)!
 
@@ -49,8 +50,12 @@ fn main() {
 		}
 	}
 
-	// Get the date ranges for the past n months
+	if zone == '' {
+		println('A zone name is required.')
+		exit(1)
+	}
+
 	date_ranges := past_n_months(months).map(|m| m.full_month_date_range())
 
-	println(date_ranges)
+	zone_stats(zone, date_ranges[0], token)
 }
