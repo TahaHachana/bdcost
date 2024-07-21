@@ -1,5 +1,6 @@
 module main
 
+import clitable
 import os
 import flag
 
@@ -57,5 +58,8 @@ fn main() {
 
 	date_ranges := past_n_months(months).map(|m| m.full_month_date_range())
 
-	zone_stats(zone, date_ranges[0], token)
+	stats := bulk_zone_stats(zone, date_ranges, token)
+
+	clitable.print_structs(stats)
+
 }
