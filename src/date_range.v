@@ -2,7 +2,6 @@ module main
 
 import time
 
-
 struct Month {
 	month int
 	year  int
@@ -21,7 +20,7 @@ fn (m Month) full_month_date_range() DateRange {
 		month: m.month
 		day: 1
 	}
-	
+
 	to := time.Time{
 		year: m.year
 		month: m.month

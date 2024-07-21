@@ -1,5 +1,6 @@
 module main
 
+import arrays
 import clitable
 import os
 import flag
@@ -20,6 +21,29 @@ fn finalize_fp(mut fp flag.FlagParser) ! {
 	if additional_args.len > 0 {
 		println('Unprocessed arguments:\n${additional_args.join_lines()}')
 	}
+}
+
+fn print_zone_report(months int, zone string, token string) {
+	date_ranges := past_n_months(months).map(|m| m.full_month_date_range())
+
+	stats := bulk_zone_stats(zone, date_ranges, token)
+
+	mut table := clitable.Table{}
+
+	table.add_column('Month')
+	table.add_column('Bandwidth (GB)')
+	table.add_column('Cost (USD)')
+
+	for stat in stats {
+		table.add_row([stat.month, stat.bw.str(), stat.cost.str()])
+	}
+
+	// Total row
+	total_bw := arrays.sum(stats.map(|s| s.bw)) or { panic(err) }
+	total_cost := arrays.sum(stats.map(|s| s.cost)) or { panic(err) }
+	table.add_row(['Total', total_bw.str(), total_cost.str()])
+
+	clitable.print_table(table)
 }
 
 fn main() {
@@ -56,19 +80,5 @@ fn main() {
 		exit(1)
 	}
 
-	date_ranges := past_n_months(months).map(|m| m.full_month_date_range())
-
-	stats := bulk_zone_stats(zone, date_ranges, token)
-
-	mut table := clitable.Table{}
-
-	table.add_column('Month')
-	table.add_column('Bandwidth (GB)')
-	table.add_column('Cost (USD)')
-
-	for stat in stats {
-		table.add_row([stat.month, stat.bw.str(), stat.cost.str()])
-	}
-
-	clitable.print_table(table)
+	print_zone_report(months, zone, token)
 }
