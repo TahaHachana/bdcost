@@ -4,6 +4,7 @@ import json
 import math
 import net.http
 import regex
+import time
 
 const cost_base_url = 'https://api.brightdata.com/zone/cost?zone='
 const bearer_prefix = 'Bearer '
@@ -23,6 +24,12 @@ struct AccountStats {
 
 struct Root {
 	account AccountStats
+}
+
+struct StatsWithMonth {
+	month string
+	bw    f64
+	cost  f32
 }
 
 fn build_req_url(zone string, from string, to string) string {
@@ -58,18 +65,23 @@ fn bandwith_in_gb(r Root) Root {
 	}
 }
 
-fn zone_stats(zone string, dr DateRange, token string) Stats {
+fn zone_stats(zone string, dr DateRange, token string) StatsWithMonth {
 	from, to := dr.to_string()
 	req_url := build_req_url(zone, from, to)
 	req := build_req(req_url, token)
 	println('Fetching data for zone ${zone} from ${from} to ${to}...')
 	resp := req.do() or { panic(err) }
 	root := bandwith_in_gb(parse_api_response(resp))
-	return root.account.custom
+	month := time.long_months[dr.from.month - 1] + ' ' + dr.from.year.str()
+	return StatsWithMonth{
+		month: month
+		bw: root.account.custom.bw
+		cost: root.account.custom.cost
+	}
 }
 
-fn bulk_zone_stats(zone string, drs []DateRange, token string) []Stats {
-	return drs.map(fn [zone, token] (dr DateRange) Stats {
+fn bulk_zone_stats(zone string, drs []DateRange, token string) []StatsWithMonth {
+	return drs.map(fn [zone, token] (dr DateRange) StatsWithMonth {
 		return zone_stats(zone, dr, token)
 	})
 }

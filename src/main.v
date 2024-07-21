@@ -60,6 +60,15 @@ fn main() {
 
 	stats := bulk_zone_stats(zone, date_ranges, token)
 
-	clitable.print_structs(stats)
+	mut table := clitable.Table{}
 
+	table.add_column('Month')
+	table.add_column('Bandwidth (GB)')
+	table.add_column('Cost (USD)')
+
+	for stat in stats {
+		table.add_row([stat.month, stat.bw.str(), stat.cost.str()])
+	}
+
+	clitable.print_table(table)
 }
