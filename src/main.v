@@ -76,8 +76,7 @@ fn main() {
 	}
 
 	if zone == '' {
-		println('A zone name is required.')
-		exit(1)
+		exit(0)
 	}
 
 	print_zone_report(months, zone, token)
